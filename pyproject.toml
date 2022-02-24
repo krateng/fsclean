@@ -1,13 +1,13 @@
 [project]
-name = "yeonji"
+name = "fsclean"
 version = "1.0.0"
-description = "Collection of command line tools"
+description = "Tool to clean up filenames"
 readme = "./README.md"
 requires-python = ">=3.6"
 license = { file="./LICENSE" }
-authors = [ { name="Johannes Krattenmacher", email="yeonji@dev.krateng.ch" } ]
+authors = [ { name="Johannes Krattenmacher", email="fsclean@dev.krateng.ch" } ]
 
-urls.repository = "https://github.com/krateng/yeonji"
+urls.repository = "https://github.com/krateng/fsclean"
 
 keywords = ["scripts", "commandline"]
 classifiers = [
@@ -17,24 +17,13 @@ classifiers = [
 ]
 
 dependencies = [
-	"tabulate",
-	"send2trash",
-	"doreah>=1.6.11",
-	"unidecode",
 	"emoji",
-	"yt-dlp"
+	"unidecode",
+	"doreah"
 ]
 
 [project.scripts]
-borgsize =	"yeonji.borgsize:main"
-fsclean =	"yeonji.fsclean:main"
-me2dlc =	"yeonji.me2dlc:main"
-mkvthumb =	"yeonji.mkvthumb:main"
-ytdlj =		"yeonji.ytdlj:main"
-yttag =		"yeonji.yttag:main"
-
-flacco =	"yeonji.flacco:main"
-ytd =		"yeonji.ytd:main"
+fsclean =	"fsclean:main"
 
 [build-system]
 requires = ["flit_core >=3.2,<4"]
