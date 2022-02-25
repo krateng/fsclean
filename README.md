@@ -1,6 +1,6 @@
 # fsclean
 
-Clean unicode filenames in a directory tree.
+Clean unicode filenames in a directory tree. This is meant for your personal folder or a medialibrary - don't clean system directories or similar!
 
 ## Install
 
