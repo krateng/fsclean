@@ -19,7 +19,8 @@ classifiers = [
 dependencies = [
 	"emoji",
 	"unidecode",
-	"doreah"
+	"doreah",
+	"send2trash"
 ]
 
 [project.scripts]

@@ -10,6 +10,7 @@ import datetime
 
 import emoji
 import unidecode
+from send2trash import send2trash
 
 from doreah.io import col
 from doreah.control import mainfunction
@@ -34,7 +35,7 @@ customreplace = {
 # 4 - Lower Case everything
 #
 
-def cleanfile(name,level):
+def cleanfilename(name,level):
 	name = " ".join(name.split())
 	name = "".join(customreplace[char] if char in customreplace else char for char in name)
 	if level == 1:
@@ -47,6 +48,8 @@ def cleanfile(name,level):
 		name = name.replace("/","-")
 		name = name.replace("'","")
 		name = name.replace('"','')
+		name = name.replace(",","")
+		name = name.replace(';','')
 		# replace all whitespaces with normal one (and collapse multiple into one)
 		name = " ".join(name.split())
 	if level > 2:
@@ -77,7 +80,7 @@ def cleandir(root,path=[],printeddepth=0):
 		if changed: printeddepth = len(path)
 
 	for f in files:
-		fc = cleanfile(f,level=level)
+		fc = cleanfilename(f,level=level)
 		if (not changed) and fc != f:
 			changed = True
 			while printeddepth<len(path):
@@ -98,7 +101,7 @@ def main(rootpath,level=3,dryrun=False,save_log=False):
 	for root, dirs, files in os.walk(rootpath,topdown=False):
 		for f in files+dirs:
 			found += 1
-			fc = cleanfile(f,level=level)
+			fc = cleanfilename(f,level=level)
 			oldname = os.path.join(root,f)
 			newname = os.path.join(root,fc)
 			if fc != f:
@@ -107,16 +110,37 @@ def main(rootpath,level=3,dryrun=False,save_log=False):
 
 				if os.path.exists(newname):
 					print(newname,"already exists!")
-					skipped += 1
-					try:
-						for f in [oldname,newname]:
-							sha256_hash = hashlib.sha256()
-							with open(f,"rb") as fd:
-								for byte_block in iter(lambda: fd.read(4096),b""):
-									sha256_hash.update(byte_block)
-							print("Hash: " + sha256_hash.hexdigest())
-					except:
-						pass
+					info = {
+						'old':{'name':oldname},
+						'new':{'name':newname}
+					}
+					for k,v in info.items():
+						sha256_hash = hashlib.sha256()
+						with open(v['name'],"rb") as fd:
+							for byte_block in iter(lambda: fd.read(4096),b""):
+								sha256_hash.update(byte_block)
+						v['hash'] = sha256_hash.hexdigest()
+						print(f"Hash: {v['hash']}")
+					if info['old']['hash'] == info['new']['hash']:
+						print("Hashes match, deleting old file...")
+						if not dryrun: send2trash(oldname)
+					else:
+						print("Hash mismatch...")
+						newname_raw, _, newname_ext = newname.rpartition('.')
+						append = 0
+						while True:
+							append += 1
+							newname = ".".join([newname_raw,str(append),newname_ext])
+							if not os.path.exists(newname):
+								print("Renaming to",newname,"instead...")
+								changed += 1
+								if not dryrun: os.rename(oldname,newname)
+								renamed.append({"original":oldname,"new":newname})
+								break
+
+
+
+
 				else:
 					changed += 1
 					if not dryrun: os.rename(oldname,newname)
